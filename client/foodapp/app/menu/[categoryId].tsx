@@ -29,19 +29,16 @@ export default function CategoryPage() {
 
     api
       .get(`/menu/category/${categoryId}`)
-      .then((res) => {
-        setItems(res.data);
-      })
-      .catch((err) => {
-        console.error("MENU FETCH ERROR:", err);
-      })
+      .then((res) => setItems(res.data))
+      .catch((err) => console.error("MENU FETCH ERROR:", err))
       .finally(() => setLoading(false));
   }, [categoryId]);
 
   if (!cartContext) {
     return (
       <View style={styles.center}>
-        <Text style={styles.text}>Loading cart...</Text>
+        <ActivityIndicator size="small" color="#6C5CE7" />
+        <Text style={styles.helperText}>Preparing cart...</Text>
       </View>
     );
   }
@@ -50,7 +47,7 @@ export default function CategoryPage() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#6C5CE7" />
-        <Text style={styles.text}>Loading menu...</Text>
+        <Text style={styles.helperText}>Loading delicious items 🍔</Text>
       </View>
     );
   }
@@ -58,7 +55,11 @@ export default function CategoryPage() {
   if (items.length === 0) {
     return (
       <View style={styles.center}>
-        <Text style={styles.text}>No items available 🍽️</Text>
+        <Text style={styles.emptyEmoji}>🍽️</Text>
+        <Text style={styles.emptyText}>No items available</Text>
+        <Text style={styles.emptySub}>
+          Please check back later
+        </Text>
       </View>
     );
   }
@@ -67,8 +68,15 @@ export default function CategoryPage() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Menu</Text>
+      {/* Header */}
+      <View style={styles.headerBox}>
+        <Text style={styles.headerTitle}>Menu</Text>
+        <Text style={styles.headerSub}>
+          Choose your favourite items
+        </Text>
+      </View>
 
+      {/* Items */}
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -77,37 +85,71 @@ export default function CategoryPage() {
           <MenuItemCard
             key={item._id}
             item={item}
-            onAddToCart={() => addToCart(item, )}
+            onAddToCart={() => addToCart(item)}
           />
         ))}
       </ScrollView>
     </View>
   );
 }
+
+/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9F9F9", // force light background
+    backgroundColor: "#F9F9F9",
   },
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
+
+  /* Header */
+  headerBox: {
     padding: 16,
-    color: "#333",
+    paddingBottom: 8,
+    backgroundColor: "#F9F9F9",
   },
+  headerTitle: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#111827",
+  },
+  headerSub: {
+    marginTop: 4,
+    fontSize: 14,
+    color: "#6B7280",
+  },
+
+  /* Scroll */
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingBottom: 24,
   },
+
+  /* States */
   center: {
     flex: 1,
     backgroundColor: "#F9F9F9",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 24,
   },
-  text: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#333",
+  helperText: {
+    marginTop: 12,
+    fontSize: 15,
+    color: "#6B7280",
+  },
+
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: 10,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  emptySub: {
+    marginTop: 4,
+    fontSize: 14,
+    color: "#6B7280",
   },
 });

@@ -37,134 +37,194 @@ export default function Profile() {
       </View>
     );
   }
+
   const toggleLanguage = async (val: boolean) => {
-  const newLang = val ? "zu" : "en";
+    const newLang = val ? "zu" : "en";
+    setLanguage(newLang);
 
-  setLanguage(newLang);
+    await api.put("/users/language", {
+      language: newLang,
+    });
+  };
 
-  await api.put("/users/language", {
-    language: newLang,
-  });
-};
-const logout = async () => {
-  await AsyncStorage.removeItem("token");
-  router.replace("/login");
-};
-
+  const logout = async () => {
+    await AsyncStorage.removeItem("token");
+    router.replace("/login");
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Profile</Text>
 
-      {/* User Card */}
-      <View style={styles.card}>
+      {/* Profile Card */}
+      <View style={styles.profileCard}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>
+            {user?.name.charAt(0).toUpperCase()}
+          </Text>
+        </View>
+
         <Text style={styles.name}>{user?.name}</Text>
         <Text style={styles.email}>{user?.email}</Text>
-        <Text style={styles.role}>
-          Role: {user?.role.toUpperCase()}
-        </Text>
+
+        <View style={styles.roleBadge}>
+          <Text style={styles.roleText}>
+            {user?.role.toUpperCase()}
+          </Text>
+        </View>
       </View>
 
-      {/* Language Card */}
+      {/* Settings Card */}
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>App Language</Text>
+        <Text style={styles.sectionTitle}>App Settings</Text>
 
-        <View style={styles.langRow}>
-          <Text style={styles.langText}>
-            {language === "en" ? "English" : "Zulu"}
-          </Text>
+        <View style={styles.settingRow}>
+          <View>
+            <Text style={styles.settingLabel}>
+              Language
+            </Text>
+            <Text style={styles.settingSub}>
+              {language === "en" ? "English" : "Zulu"}
+            </Text>
+          </View>
 
-         <Switch
-  value={language === "zu"}
-  onValueChange={toggleLanguage}
-  trackColor={{ false: "#ccc", true: "#6C5CE7" }}
-/>
-
+          <Switch
+            value={language === "zu"}
+            onValueChange={toggleLanguage}
+            trackColor={{ false: "#D1D5DB", true: "#6C5CE7" }}
+            thumbColor="#fff"
+          />
         </View>
 
         <Text style={styles.note}>
-          Language applies to the entire app 🌍
+          Changes apply instantly across the app 🌍
         </Text>
       </View>
-      {/* Logout */}
-<TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-  <Text style={styles.logoutText}>Logout</Text>
-</TouchableOpacity>
 
+      {/* Logout */}
+      <TouchableOpacity
+        style={styles.logoutBtn}
+        onPress={logout}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
     </View>
   );
 }
+
+/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9F9F9",
+    backgroundColor: "#F4F6F8",
     padding: 20,
   },
   header: {
     fontSize: 26,
     fontWeight: "bold",
     marginBottom: 20,
-    color: "#333",
+    color: "#111827",
   },
-  card: {
+
+  /* Profile Card */
+  profileCard: {
     backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 18,
+    padding: 20,
+    alignItems: "center",
+    marginBottom: 20,
     elevation: 3,
+  },
+  avatar: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#6C5CE7",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  avatarText: {
+    color: "#fff",
+    fontSize: 32,
+    fontWeight: "bold",
   },
   name: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: "#111827",
   },
   email: {
     fontSize: 14,
-    color: "#666",
+    color: "#6B7280",
     marginTop: 4,
   },
-  role: {
-    marginTop: 8,
-    fontSize: 14,
-    fontWeight: "500",
+  roleBadge: {
+    marginTop: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: "#EEF2FF",
+  },
+  roleText: {
+    fontSize: 12,
+    fontWeight: "600",
     color: "#6C5CE7",
+  },
+
+  /* Settings */
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    elevation: 2,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 10,
-    color: "#333",
+    marginBottom: 14,
+    color: "#111827",
   },
-  langRow: {
+  settingRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  langText: {
+  settingLabel: {
     fontSize: 16,
-    color: "#333",
+    fontWeight: "500",
+    color: "#111827",
+  },
+  settingSub: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginTop: 2,
   },
   note: {
-    marginTop: 8,
+    marginTop: 10,
     fontSize: 12,
-    color: "#777",
+    color: "#9CA3AF",
   },
+
+  /* Logout */
+  logoutBtn: {
+    backgroundColor: "#EF4444",
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  logoutText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  logoutBtn: {
-  marginTop: 20,
-  backgroundColor: "#ff4d4d",
-  padding: 14,
-  borderRadius: 10,
-  alignItems: "center",
-},
-logoutText: {
-  color: "#fff",
-  fontSize: 16,
-  fontWeight: "bold",
-},
-
 });

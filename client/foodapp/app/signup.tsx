@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ImageBackground,
 } from "react-native";
 import { useState } from "react";
 import { router } from "expo-router";
@@ -26,110 +27,128 @@ export default function Signup() {
         language: "en",
       });
 
-      Alert.alert("Success", "Account created successfully");
+      Alert.alert("Success", "Account created successfully 🎉");
       router.replace("/login");
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "Signup failed");
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.container}
+    <ImageBackground
+      source={{
+        uri: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe",
+      }}
+      style={styles.bg}
+      resizeMode="cover"
     >
-      <View style={styles.card}>
-        <Text style={styles.title}>Create Account ✨</Text>
-        <Text style={styles.subtitle}>
-          Sign up to start ordering delicious food
-        </Text>
+      {/* Dark overlay */}
+      <View style={styles.overlay} />
 
-        {/* Name */}
-        <TextInput
-          placeholder="Full Name"
-          placeholderTextColor="#999"
-          value={name}
-          onChangeText={setName}
-          style={styles.input}
-        />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.container}
+      >
+        <View style={styles.card}>
+          <Text style={styles.title}>Create Account ✨</Text>
+          <Text style={styles.subtitle}>
+            Sign up to start ordering delicious food
+          </Text>
 
-        {/* Email */}
-        <TextInput
-          placeholder="Email"
-          placeholderTextColor="#999"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          style={styles.input}
-        />
+          <TextInput
+            placeholder="Full Name"
+            placeholderTextColor="#999"
+            value={name}
+            onChangeText={setName}
+            style={styles.input}
+          />
 
-        {/* Password */}
-        <TextInput
-          placeholder="Password"
-          placeholderTextColor="#999"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={styles.input}
-        />
+          <TextInput
+            placeholder="Email"
+            placeholderTextColor="#999"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            style={styles.input}
+          />
 
-        {/* Signup Button */}
-        <TouchableOpacity style={styles.button} onPress={handleSignup}>
-          <Text style={styles.buttonText}>Create Account</Text>
-        </TouchableOpacity>
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor="#999"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            style={styles.input}
+          />
 
-        {/* Login Link */}
-        <Text
-          style={styles.loginText}
-          onPress={() => router.push("/login")}
-        >
-          Already have an account?{" "}
-          <Text style={styles.loginLink}>Login</Text>
-        </Text>
-      </View>
-    </KeyboardAvoidingView>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSignup}
+          >
+            <Text style={styles.buttonText}>Create Account</Text>
+          </TouchableOpacity>
+
+          <Text
+            style={styles.loginText}
+            onPress={() => router.push("/login")}
+          >
+            Already have an account?{" "}
+            <Text style={styles.loginLink}>Login</Text>
+          </Text>
+        </View>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 }
+
+/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
+  bg: {
+    flex: 1,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.55)",
+  },
   container: {
     flex: 1,
-    backgroundColor: "#6C5CE7",
     justifyContent: "center",
     padding: 20,
   },
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 20,
-    elevation: 5,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    borderRadius: 18,
+    padding: 22,
+    elevation: 8,
   },
   title: {
     fontSize: 26,
     fontWeight: "bold",
-    marginBottom: 5,
-    color: "#333",
+    marginBottom: 6,
+    color: "#111827",
   },
   subtitle: {
     fontSize: 14,
-    color: "#666",
-    marginBottom: 20,
+    color: "#6B7280",
+    marginBottom: 22,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 15,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
     fontSize: 16,
-    color: "#000",
-    backgroundColor: "#fafafa",
+    backgroundColor: "#F9FAFB",
+    color: "#111827",
   },
   button: {
     backgroundColor: "#6C5CE7",
-    paddingVertical: 14,
-    borderRadius: 10,
+    paddingVertical: 15,
+    borderRadius: 12,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 6,
   },
   buttonText: {
     color: "#fff",
@@ -137,9 +156,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   loginText: {
-    marginTop: 15,
+    marginTop: 18,
     textAlign: "center",
-    color: "#666",
+    color: "#6B7280",
   },
   loginLink: {
     color: "#6C5CE7",
