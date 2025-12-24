@@ -4,6 +4,7 @@ import {
   FlatList,
   Pressable,
   StyleSheet,
+  Modal,
 } from "react-native";
 import { useEffect, useState } from "react";
 import api from "../../api/axiosConfig";
@@ -20,7 +21,7 @@ const STATUSES = [
 export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
   const [status, setStatus] = useState("");
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   useEffect(() => {
     api
@@ -39,7 +40,7 @@ export default function AdminOrders() {
       )
     );
 
-    setOpenDropdown(null);
+    setSelectedOrder(null);
   };
 
   return (
@@ -49,7 +50,7 @@ export default function AdminOrders() {
         Manage and track all customer orders
       </Text>
 
-      {/* Status Filters */}
+      {/* Filters */}
       <View style={styles.filters}>
         {STATUSES.map((s) => (
           <Pressable
@@ -76,11 +77,10 @@ export default function AdminOrders() {
       <FlatList
         data={orders}
         keyExtractor={(o) => o._id}
-        contentContainerStyle={{ paddingBottom: 30 }}
+        contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            {/* Header Row */}
             <View style={styles.row}>
               <View>
                 <Text style={styles.user}>
@@ -91,75 +91,65 @@ export default function AdminOrders() {
                 </Text>
               </View>
 
-              <View style={{ position: "relative" }}>
-                <Pressable
-                  onPress={() =>
-                    setOpenDropdown(
-                      openDropdown === item._id
-                        ? null
-                        : item._id
-                    )
-                  }
-                  style={[
-                    styles.badge,
-                    {
-                      backgroundColor: statusColor(
-                        item.status
-                      ),
-                    },
-                  ]}
-                >
-                  <Text style={styles.badgeText}>
-                    {item.status
-                      .replaceAll("_", " ")
-                      .toUpperCase()}
-                  </Text>
-                </Pressable>
-
-                {/* Dropdown */}
-                {openDropdown === item._id && (
-                  <View style={styles.dropdown}>
-                    {STATUSES.map((s) => (
-                      <Pressable
-                        key={s}
-                        onPress={() =>
-                          updateStatus(item._id, s)
-                        }
-                        style={styles.dropdownRow}
-                      >
-                        <Text style={styles.dropdownItem}>
-                          {s.replaceAll("_", " ")}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                )}
-              </View>
+              <Pressable
+                onPress={() => setSelectedOrder(item)}
+                style={[
+                  styles.badge,
+                  { backgroundColor: statusColor(item.status) },
+                ]}
+              >
+                <Text style={styles.badgeText}>
+                  {item.status.replaceAll("_", " ").toUpperCase()}
+                </Text>
+              </Pressable>
             </View>
 
-            {/* Footer */}
             <View style={styles.footer}>
-              <Text style={styles.total}>
-                ₹{item.total}
-              </Text>
+              <Text style={styles.total}>₹{item.total}</Text>
 
               <Pressable
                 onPress={() =>
                   router.push({
-                    pathname:
-                      "/(admin)/order-details/[id]",
+                    pathname: "/(admin)/order-details/[id]",
                     params: { id: item._id },
                   })
                 }
               >
-                <Text style={styles.view}>
-                  View Details →
-                </Text>
+                <Text style={styles.view}>View Details →</Text>
               </Pressable>
             </View>
           </View>
         )}
       />
+
+      {/* ✅ MODAL DROPDOWN */}
+      <Modal
+        transparent
+        animationType="fade"
+        visible={!!selectedOrder}
+        onRequestClose={() => setSelectedOrder(null)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setSelectedOrder(null)}
+        >
+          <View style={styles.modalDropdown}>
+            {STATUSES.map((s) => (
+              <Pressable
+                key={s}
+                style={styles.dropdownRow}
+                onPress={() =>
+                  updateStatus(selectedOrder._id, s)
+                }
+              >
+                <Text style={styles.dropdownItem}>
+                  {s.replaceAll("_", " ")}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -260,16 +250,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     zIndex: 100,
   },
-  dropdownRow: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  dropdownItem: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    textTransform: "capitalize",
-  },
+  
+  
 
   /* Footer */
   footer: {
@@ -288,4 +270,31 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#6C5CE7",
   },
+  modalOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.25)",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+modalDropdown: {
+  backgroundColor: "#fff",
+  borderRadius: 16,
+  width: 220,
+  paddingVertical: 6,
+  elevation: 12,
+},
+
+dropdownRow: {
+  paddingVertical: 14,
+  paddingHorizontal: 18,
+},
+
+dropdownItem: {
+  fontSize: 15,
+  fontWeight: "600",
+  color: "#374151",
+  textTransform: "capitalize",
+},
+
 });
