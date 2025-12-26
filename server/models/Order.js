@@ -7,19 +7,37 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
     items: [
       {
         menuItem: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "MenuItem",
+          required: true,
         },
-        quantity: Number,
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
       },
     ],
-    total: Number,
+
+    total: {
+      type: Number,
+      required: true,
+    },
+
     status: {
       type: String,
-      default: "pending", // pending | preparing | out_for_delivery | completed
+      enum: [
+        "pending",
+        "preparing",
+        "out_for_delivery",
+        "completed",
+        "cancelled", // ✅ ADD THIS
+      ],
+      default: "pending",
     },
   },
   { timestamps: true }

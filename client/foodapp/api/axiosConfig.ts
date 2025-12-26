@@ -5,6 +5,9 @@ const api = axios.create({
   baseURL: "https://foodapp-backend-x815.onrender.com/api",
 });
 
+
+//http://localhost:5000/api
+//https://foodapp-backend-x815.onrender.com/api
 api.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem("token");
 

@@ -85,7 +85,7 @@ export default function Orders() {
               pressed && styles.pressed,
             ]}
             onPress={() =>
-              router.push(`/order-status/${item._id}`)
+              router.push(`/order-details/${item._id}`)
             }
           >
             {/* Left */}

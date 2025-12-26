@@ -70,3 +70,43 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 
+exports.getOrderDetails = async (req, res) => {
+  try {
+    const order = await Order.findOne({
+      _id: req.params.id,
+      user: req.user.id, // 🔐 ownership check
+    }).populate("items.menuItem");
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch order" });
+  }
+};
+
+/* ================= CANCEL ORDER ================= */
+exports.cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findOne({
+      _id: req.params.id,
+      user: req.user.id,
+      status: "pending",
+    });
+
+    if (!order) {
+      return res
+        .status(400)
+        .json({ message: "Order cannot be cancelled" });
+    }
+
+    order.status = "cancelled";
+    await order.save();
+
+    res.json({ message: "Order cancelled successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Cancel failed" });
+  }
+};
