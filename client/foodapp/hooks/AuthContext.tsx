@@ -32,9 +32,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         const res = await api.get<User>("/users/me");
         setUser(res.data);
-      } catch {
-        await AsyncStorage.removeItem("token");
-      } finally {
+      } catch (err: any) {
+  console.log("Restore session failed:", err?.response?.status);
+
+  
+  if (err?.response?.status === 401) {
+    await AsyncStorage.removeItem("token");
+    setUser(null);
+  }
+}
+finally {
         setLoading(false);
       }
     };

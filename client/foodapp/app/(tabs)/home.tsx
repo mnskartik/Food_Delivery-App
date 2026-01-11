@@ -1,103 +1,180 @@
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import {
   View,
   Text,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
+  FlatList,
+  TextInput,
+  Switch,
 } from "react-native";
-import { useEffect, useState } from "react";
-import api from "../../api/axiosConfig";
-import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import Slider from "@react-native-community/slider";
 
-const categoryImages: Record<string, string> = {
-  Burgers: "https://images.unsplash.com/photo-1550547660-d9450f859349",
-  Pizza: "https://images.unsplash.com/photo-1604382355076-af4b0eb60143",
-  Drinks: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97",
-  Desserts: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f",
-};
+import { useEffect, useState, useContext } from "react";
+import api from "../../api/axiosConfig";
+import { CartContext } from "../../hooks/CartContext";
 
-interface Category {
+/* ---------------- TYPES ---------------- */
+interface Restaurant {
   _id: string;
   name: string;
+  image: string;
+  rating: number;
+  deliveryTime: string;
+  distance: number;
+  isVeg: boolean;
+  categories: string[];
 }
 
 export default function HomeScreen() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cartContext = useContext(CartContext);
+  const cartCount = cartContext?.cart.length || 0;
+
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [search, setSearch] = useState("");
+  const [rating, setRating] = useState<number | null>(null);
+  const [vegOnly, setVegOnly] = useState(false);
+  const [distance, setDistance] = useState<number | null>(null);
 
   useEffect(() => {
-    api
-      .get<Category[]>("/menu/categories")
-      .then((res) => setCategories(res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+    fetchRestaurants();
+  }, [search, rating, vegOnly, distance]);
+
+  const fetchRestaurants = async () => {
+    const params: any = {};
+
+    if (search) params.search = search;
+    if (rating) params.rating = rating;
+    if (vegOnly) params.veg = true;
+    if (distance) params.distance = distance;
+
+    const res = await api.get("/restaurants", { params });
+    setRestaurants(res.data);
+  };
 
   return (
     <>
-      <Stack.Screen options={{ title: "Menu" }} />
+      <Stack.Screen options={{ headerShown: false }} />
 
       <View style={styles.container}>
-        {/* Header */}
+        {/* ---------------- HEADER ---------------- */}
         <View style={styles.header}>
-          <Text style={styles.title}>What are you craving?</Text>
-          <Text style={styles.subtitle}>
-            Fresh food, delivered fast 🍔🍕
-          </Text>
+          <Text style={styles.title}>Discover Food</Text>
+
+          <Pressable
+            style={styles.cartBtn}
+            onPress={() => router.push("/(tabs)/cart")}
+          >
+            <Ionicons name="cart-outline" size={26} />
+            {cartCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{cartCount}</Text>
+              </View>
+            )}
+          </Pressable>
         </View>
 
-        {/* Loading */}
-        {loading && (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color="#6C5CE7" />
-            <Text style={styles.loadingText}>Loading categories...</Text>
-          </View>
-        )}
+        {/* ---------------- SEARCH ---------------- */}
+        <View style={styles.searchBox}>
+          <Ionicons name="search" size={18} color="#6B7280" />
+          <TextInput
+            placeholder="Search restaurants..."
+            value={search}
+            onChangeText={setSearch}
+            style={styles.searchInput}
+          />
+        </View>
 
-        {/* Categories */}
-        {!loading &&
-          categories.map((cat) => (
+        {/* ---------------- FILTERS ---------------- */}
+        <View style={styles.filters}>
+
+  {/* Rating Filter */}
+  <View style={styles.filterBlock}>
+    <Text style={styles.filterLabel}>
+      ⭐ Minimum Rating: {rating ?? "Any"}
+    </Text>
+    <Slider
+      minimumValue={1}
+      maximumValue={5}
+      step={0.5}
+      value={rating || 1}
+      onValueChange={val => setRating(val)}
+      minimumTrackTintColor="#6C5CE7"
+      maximumTrackTintColor="#D1D5DB"
+    />
+  </View>
+
+  {/* Distance Filter */}
+  <View style={styles.filterBlock}>
+    <Text style={styles.filterLabel}>
+      📍 Distance: {distance ? `${distance} km` : "Any"}
+    </Text>
+    <Slider
+      minimumValue={1}
+      maximumValue={20}
+      step={1}
+      value={distance || 20}
+      onValueChange={val => setDistance(val)}
+      minimumTrackTintColor="#6C5CE7"
+      maximumTrackTintColor="#D1D5DB"
+    />
+  </View>
+
+  {/* Veg Toggle */}
+  <View style={styles.vegToggle}>
+    <Text style={styles.filterLabel}>🥗 Veg only</Text>
+    <Switch value={vegOnly} onValueChange={setVegOnly} />
+  </View>
+
+</View>
+
+        {/* ---------------- RESTAURANTS ---------------- */}
+        <FlatList
+          data={restaurants}
+          keyExtractor={(item) => item._id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 30 }}
+          renderItem={({ item }) => (
             <Pressable
-              key={cat._id}
-              style={({ pressed }) => [
-                styles.card,
-                pressed && styles.pressed,
-              ]}
-              onPress={() => router.push(`/menu/${cat._id}`)}
+              style={styles.card}
+              onPress={() =>
+                router.push(`/menu/${item._id}`)
+              }
             >
               <Image
-                source={{ uri: categoryImages[cat.name] }}
+                source={{ uri: item.image }}
                 style={styles.image}
               />
 
-              {/* Gradient Overlay */}
-              <LinearGradient
-                colors={["transparent", "rgba(0,0,0,0.85)"]}
-                style={styles.gradient}
-              />
+              <View style={styles.cardBody}>
+                <View style={styles.rowBetween}>
+                  <Text style={styles.name}>{item.name}</Text>
+                  <Text style={styles.rating}>
+                    ⭐ {item.rating}
+                  </Text>
+                </View>
 
-              <View style={styles.overlayContent}>
-                <Text style={styles.cardTitle}>{cat.name}</Text>
-                <Text style={styles.explore}>Explore →</Text>
+                <Text style={styles.meta}>
+                  ⏱ {item.deliveryTime} • 📍{" "}
+                  {item.distance} km
+                </Text>
+
+                <Text style={styles.categories}>
+                  {item.categories.join(" • ")}
+                </Text>
               </View>
             </Pressable>
-          ))}
-
-        {/* Empty */}
-        {!loading && categories.length === 0 && (
-          <View style={styles.center}>
-            <Text style={styles.emptyText}>
-              No categories available 🍽️
-            </Text>
-          </View>
-        )}
+          )}
+        />
       </View>
     </>
   );
 }
+
+/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -106,72 +183,116 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    marginBottom: 18,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
   },
   title: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#111827",
-  },
-  subtitle: {
-    marginTop: 4,
-    fontSize: 14,
-    color: "#6B7280",
   },
 
-  center: {
-    flex: 1,
-    justifyContent: "center",
+  cartBtn: { position: "relative" },
+  badge: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    backgroundColor: "#EF4444",
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     alignItems: "center",
+    justifyContent: "center",
   },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 15,
-    color: "#6B7280",
+  badgeText: { color: "#fff", fontSize: 11 },
+
+  searchBox: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  searchInput: {
+    flex: 1,
+    padding: 10,
+  },
+
+  filters: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 14,
+  },
+  filterChip: {
+    backgroundColor: "#E5E7EB",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  activeChip: {
+    backgroundColor: "#6C5CE7",
+  },
+  filterText: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  vegToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
 
   card: {
-    height: 160,
-    borderRadius: 20,
-    marginBottom: 18,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginBottom: 16,
     overflow: "hidden",
-    backgroundColor: "#000",
-    elevation: 6,
+    elevation: 4,
   },
-  pressed: {
-    transform: [{ scale: 0.97 }],
-  },
-
   image: {
+    height: 150,
     width: "100%",
-    height: "100%",
   },
-
-  gradient: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    height: "60%",
+  cardBody: {
+    padding: 14,
   },
-
-  overlayContent: {
-    position: "absolute",
-    bottom: 16,
-    left: 16,
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
-  cardTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
+  name: {
+    fontSize: 18,
+    fontWeight: "600",
   },
-  explore: {
-    marginTop: 4,
+  rating: {
     fontSize: 14,
-    color: "#E5E7EB",
+    fontWeight: "600",
   },
-
-  emptyText: {
-    fontSize: 16,
+  meta: {
+    marginTop: 6,
+    fontSize: 13,
     color: "#6B7280",
   },
+  categories: {
+    marginTop: 6,
+    fontSize: 13,
+    color: "#4B5563",
+  },
+  filterBlock: {
+  backgroundColor: "#fff",
+  padding: 12,
+  borderRadius: 12,
+  marginBottom: 10,
+},
+
+filterLabel: {
+  fontSize: 13,
+  fontWeight: "600",
+  marginBottom: 6,
+  color: "#374151",
+},
+
 });

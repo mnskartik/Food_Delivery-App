@@ -79,41 +79,45 @@ export default function Orders() {
         keyExtractor={(item) => item._id}
         contentContainerStyle={{ paddingBottom: 20 }}
         renderItem={({ item }) => (
-          <Pressable
-            style={({ pressed }) => [
-              styles.card,
-              pressed && styles.pressed,
-            ]}
-            onPress={() =>
-              router.push(`/order-details/${item._id}`)
-            }
-          >
-            {/* Left */}
-            <View>
-              <Text style={styles.orderId}>
-                Order #{item._id.slice(-6)}
-              </Text>
-              <Text style={styles.date}>
-                {new Date(item.createdAt).toLocaleString()}
-              </Text>
-            </View>
+          <View style={styles.cardContent}>
+  <Pressable
+    onPress={() => router.push(`/order-details/${item._id}`)}
+  >
+    <Text style={styles.orderId}>Order #{item._id.slice(-6)}</Text>
+    <Text style={styles.date}>
+      {new Date(item.createdAt).toLocaleString()}
+    </Text>
+  </Pressable>
 
-            {/* Right */}
-            <View style={{ alignItems: "flex-end" }}>
-              <Text style={styles.total}>₹{item.total}</Text>
+  <View style={{ alignItems: "flex-end" }}>
+    <Text style={styles.total}>₹{item.total}</Text>
 
-              <View
-                style={[
-                  styles.statusBadge,
-                  { backgroundColor: statusColor(item.status) },
-                ]}
-              >
-                <Text style={styles.statusText}>
-                  {item.status.replaceAll("_", " ").toUpperCase()}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
+    <View
+      style={[
+        styles.statusBadge,
+        { backgroundColor: statusColor(item.status) },
+      ]}
+    >
+      <Text style={styles.statusText}>
+        {item.status.replaceAll("_", " ").toUpperCase()}
+      </Text>
+    </View>
+
+    {/* REORDER */}
+    {item.status === "completed" && (
+      <Pressable
+        style={styles.reorder}
+        onPress={async () => {
+          await api.post(`/orders/reorder/${item._id}`);
+          router.push("/(tabs)/cart");
+        }}
+      >
+        <Text style={styles.reorderText}>Re-Order</Text>
+      </Pressable>
+    )}
+  </View>
+</View>
+
         )}
       />
     </View>
@@ -207,4 +211,21 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     textAlign: "center",
   },
+  cardContent: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+},
+reorder: {
+  marginTop: 8,
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 8,
+  backgroundColor: "#6C5CE7",
+},
+reorderText: {
+  color: "#fff",
+  fontSize: 12,
+  fontWeight: "bold",
+},
+
 });

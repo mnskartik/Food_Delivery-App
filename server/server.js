@@ -17,6 +17,8 @@ app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/admin", require("./routes/adminOrderRoutes"));
+app.use("/api/restaurants", require("./routes/restaurantRoutes"));
+
 
 
 app.get("/", (req, res) => res.send("API running..."));

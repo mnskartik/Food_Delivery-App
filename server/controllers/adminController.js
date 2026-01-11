@@ -3,7 +3,11 @@ const Order = require("../models/Order");
 exports.getAllOrders = async (req, res) => {
   const { status } = req.query;
   const filter = status ? { status } : {};
-  const orders = await Order.find(filter).populate("user").sort({ createdAt: -1 });
+  const orders = await Order.find(filter)
+  .populate("user", "name email")
+  .populate("items.menuItem", "name price")
+  .sort({ createdAt: -1 });
+
   res.json(orders);
 };
 

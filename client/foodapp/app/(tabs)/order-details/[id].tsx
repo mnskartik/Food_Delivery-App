@@ -6,6 +6,8 @@ import {
   Pressable,
   Alert,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosConfig";
@@ -33,12 +35,19 @@ export default function OrderDetails() {
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api
-      .get(`/orders/${id}`)
-      .then((res) => setOrder(res.data))
-      .finally(() => setLoading(false));
-  }, [id]);
+ useEffect(() => {
+  if (!id) return;
+
+  api
+    .get(`/orders/${id}`)
+    .then(res => setOrder(res.data))
+    .catch(err => {
+      console.log("Order fetch failed:", err.response?.status);
+    })
+    .finally(() => setLoading(false));
+}, [id]);
+
+
 
   const cancelOrder = () => {
     Alert.alert(
@@ -66,11 +75,27 @@ export default function OrderDetails() {
     );
   }
 
-  if (!order) return null;
+  if (!order && !loading) {
+  return (
+    <View style={styles.center}>
+      <Text style={{ color: "#6B7280" }}>
+        Order not found or unavailable
+      </Text>
+    </View>
+  );
+}
+
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Order Details</Text>
+      <View style={styles.topBar}>
+  <Pressable onPress={() => router.back()} style={styles.backBtn}>
+    <Ionicons name="arrow-back" size={24} color="#111827" />
+  </Pressable>
+
+  <Text style={styles.header}>Order Details</Text>
+</View>
+
 
       {/* Summary */}
       <View style={styles.card}>
@@ -183,4 +208,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  topBar: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 16,
+},
+
+backBtn: {
+  padding: 8,
+  borderRadius: 10,
+  backgroundColor: "#fff",
+  marginRight: 10,
+  elevation: 2,
+},
+
 });

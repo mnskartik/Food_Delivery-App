@@ -11,6 +11,7 @@ router.get("/orders", auth, role("admin"), async (req, res) => {
 
   const orders = await Order.find(filter)
     .populate("user", "name email")
+    .populate("items.menuItem", "name price")
     .sort({ createdAt: -1 });
 
   res.json(orders);

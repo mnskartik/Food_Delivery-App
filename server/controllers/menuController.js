@@ -10,3 +10,11 @@ exports.getMenuByCategory = async (req, res) => {
   const items = await MenuItem.find({ category: req.params.id });
   res.json(items);
 };
+
+exports.getMenuByRestaurant = async (req, res) => {
+  const items = await MenuItem.find({
+    restaurant: req.params.id,
+  }).populate("category");
+
+  res.json(items);
+};

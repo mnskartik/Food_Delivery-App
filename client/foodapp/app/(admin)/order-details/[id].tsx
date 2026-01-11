@@ -3,19 +3,17 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosConfig";
-
 import { statusColor } from "../../../utils/statusColors";
-
 
 export default function AdminOrderDetails() {
   const { id } = useLocalSearchParams();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
 
   useEffect(() => {
     api.get(`/admin/orders/${id}`).then((res) => {
@@ -23,8 +21,6 @@ export default function AdminOrderDetails() {
       setLoading(false);
     });
   }, [id]);
-
-  
 
   if (loading) {
     return (
@@ -35,7 +31,7 @@ export default function AdminOrderDetails() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Order Summary */}
       <View style={styles.card}>
         <Text style={styles.title}>Order Details</Text>
@@ -50,26 +46,38 @@ export default function AdminOrderDetails() {
         <Text style={styles.total}>₹{order.total}</Text>
       </View>
 
-      
-<View style={styles.card}>
-  <Text style={styles.section}>Order Status</Text>
+      {/* Status */}
+      <View style={styles.card}>
+        <Text style={styles.section}>Order Status</Text>
 
-  <View
-    style={[
-      styles.statusBadge,
-      { backgroundColor: statusColor(order.status) },
-    ]}
-  >
-    <Text style={styles.statusText}>
-      {order.status.replaceAll("_", " ").toUpperCase()}
-    </Text>
-  </View>
-</View>
+        <View
+          style={[
+            styles.statusBadge,
+            { backgroundColor: statusColor(order.status) },
+          ]}
+        >
+          <Text style={styles.statusText}>
+            {order.status.replaceAll("_", " ").toUpperCase()}
+          </Text>
+        </View>
+      </View>
 
+      {/* Items */}
+      <View style={styles.card}>
+        <Text style={styles.section}>Items Ordered</Text>
 
-      
-     
-    </View>
+        {order.items.map((i: any) => (
+          <View key={i._id} style={styles.itemRow}>
+            <Text style={styles.itemName}>
+              {i.menuItem.name}
+            </Text>
+            <Text style={styles.itemQty}>
+              × {i.quantity}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 const styles = StyleSheet.create({
@@ -83,25 +91,29 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   card: {
     backgroundColor: "#fff",
     borderRadius: 14,
     padding: 16,
     marginBottom: 16,
-    elevation: 2,
+    elevation: 3,
   },
+
   title: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 12,
     color: "#111827",
   },
+
   section: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
     color: "#111827",
   },
+
   label: {
     fontSize: 13,
     color: "#6B7280",
@@ -112,16 +124,21 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#111827",
   },
+
   total: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
-    marginTop: 4,
+    marginTop: 6,
     color: "#6C5CE7",
   },
+
+  /* Items */
   itemRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 6,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
   },
   itemName: {
     fontSize: 15,
@@ -129,28 +146,19 @@ const styles = StyleSheet.create({
   },
   itemQty: {
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: "bold",
   },
-  statusBox: {
-    borderWidth: 2,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  updating: {
-    marginTop: 8,
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  statusBadge: {
-  alignSelf: "flex-start",
-  paddingHorizontal: 14,
-  paddingVertical: 6,
-  borderRadius: 20,
-},
-statusText: {
-  color: "#fff",
-  fontSize: 12,
-  fontWeight: "bold",
-},
 
+  /* Status */
+  statusBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  statusText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
 });

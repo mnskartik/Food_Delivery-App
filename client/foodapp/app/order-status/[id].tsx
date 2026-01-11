@@ -19,10 +19,16 @@ const statusConfig: Record<
   completed: { color: "#10B981", label: "Completed" },
 };
 
+
+
+
 export default function OrderStatus() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const steps = ["pending", "preparing", "out_for_delivery", "completed"];
+const currentStep = steps.indexOf(status);
+
 
   useEffect(() => {
     if (!id) return;
@@ -85,6 +91,33 @@ export default function OrderStatus() {
           {current?.label}
         </Text>
       </View>
+      <View style={styles.tracker}>
+  {steps.map((s, index) => {
+    const active = index <= currentStep;
+    return (
+      <View key={s} style={styles.step}>
+        <View
+          style={[
+            styles.circle,
+            { backgroundColor: active ? statusConfig[s].color : "#E5E7EB" },
+          ]}
+        />
+        {index !== steps.length - 1 && (
+          <View
+            style={[
+              styles.line,
+              { backgroundColor: active ? "#6C5CE7" : "#E5E7EB" },
+            ]}
+          />
+        )}
+        <Text style={styles.stepLabel}>
+          {statusConfig[s].label}
+        </Text>
+      </View>
+    );
+  })}
+</View>
+
 
       {/* Info */}
       <Text style={styles.note}>
@@ -164,4 +197,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#374151",
   },
+  tracker: {
+  marginTop: 30,
+  width: "100%",
+},
+step: {
+  alignItems: "center",
+},
+circle: {
+  width: 16,
+  height: 16,
+  borderRadius: 8,
+  marginBottom: 4,
+},
+line: {
+  height: 40,
+  width: 2,
+},
+stepLabel: {
+  fontSize: 12,
+  color: "#6B7280",
+  marginBottom: 20,
+},
+
 });

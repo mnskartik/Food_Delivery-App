@@ -120,8 +120,17 @@ export default function AdminOrders() {
             </View>
           </View>
         )}
+        
       />
-
+        {selectedOrder?.items && (
+  <View style={styles.items}>
+    {selectedOrder.items.map((i: any) => (
+      <Text key={i._id} style={styles.itemRow}>
+        • {i.menuItem.name} × {i.quantity}
+      </Text>
+    ))}
+  </View>
+)}
       {/* ✅ MODAL DROPDOWN */}
       <Modal
         transparent
@@ -148,6 +157,9 @@ export default function AdminOrders() {
               </Pressable>
             ))}
           </View>
+          
+
+
         </Pressable>
       </Modal>
     </View>
@@ -296,5 +308,15 @@ dropdownItem: {
   color: "#374151",
   textTransform: "capitalize",
 },
+items: {
+  marginTop: 8,
+  paddingLeft: 4,
+},
+itemRow: {
+  fontSize: 13,
+  color: "#374151",
+  marginBottom: 4,
+},
+
 
 });

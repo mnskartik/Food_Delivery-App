@@ -1,4 +1,4 @@
-import { Tabs , Redirect } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../hooks/AuthContext";
 
@@ -11,35 +11,79 @@ export default function TabLayout() {
   if (user?.role === "admin") {
     return <Redirect href="/(admin)/orders" />;
   }
+
   return (
     <Tabs
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof Ionicons.glyphMap;
-
-          switch (route.name) {
-            case "home":
-              iconName = focused ? "restaurant" : "restaurant-outline";
-              break;
-            case "cart":
-              iconName = focused ? "cart" : "cart-outline";
-              break;
-            case "orders":
-              iconName = focused ? "receipt" : "receipt-outline";
-              break;
-            case "profile":
-              iconName = focused ? "person" : "person-outline";
-              break;
-            default:
-              iconName = "ellipse";
-          }
-
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
+      screenOptions={{
         tabBarActiveTintColor: "#6C5CE7",
         tabBarInactiveTintColor: "gray",
         headerShown: false,
-      })}
-    />
+      }}
+    >
+      {/* 1️⃣ MENU */}
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: "Menu",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "restaurant" : "restaurant-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* 2️⃣ CART */}
+      <Tabs.Screen
+        name="cart"
+        options={{
+          title: "Cart",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "cart" : "cart-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* 3️⃣ ORDERS */}
+      <Tabs.Screen
+        name="orders"
+        options={{
+          title: "Orders",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "receipt" : "receipt-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* 4️⃣ PROFILE */}
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+  name="order-details/[id]"
+  options={{ href: null }}   // 👈 hides from tab bar
+/>
+
+    </Tabs>
   );
 }
